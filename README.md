@@ -25,4 +25,6 @@ Every page has its own URL, for example `/faqs`, `/why-us`, `/gadgets`, `/trendi
 
 Firebase configuration is loaded from `.env`. Copy `.env.example` to `.env` and fill in the Firebase web app values. These `VITE_` variables are included in the client bundle, so Firebase API keys should be restricted to your deployed domains and Firebase security rules must protect your data.
 
-Firebase configuration is available in `.env` for future integrations. The current compiled application does not initialize Firebase Authentication or sync application data to Firestore.
+Firebase configuration is loaded from `.env` when provided and falls back to the Firebase web app configuration in `src/firebase-config.js`, so Vercel builds work without environment variables. Set `VITE_FIREBASE_*` variables in Vercel to override these defaults if needed.
+
+The `/admin` and `/admin/*` pages require Firebase email/password sign-in with `instacashmart@gmail.com` and the configured admin UID. Enable Email/Password in Firebase Authentication and ensure this account's UID is `1BMeS4vGMDPBXRmYBVNSNvR3ByM2`. Firebase client-side checks protect the admin UI; Firestore authorization must also be enforced with the published `firestore.rules`.
