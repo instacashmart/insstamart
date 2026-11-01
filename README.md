@@ -10,7 +10,6 @@ npm run dev
 ```
 
 Create a production build with `npm run build`.
-Run the Firebase deployment configuration checks with `npm test`.
 
 ## Pages and hosting
 
@@ -25,8 +24,6 @@ Every page has its own URL, for example `/faqs`, `/why-us`, `/gadgets`, `/trendi
 ## Firebase
 
 Firebase configuration is loaded from `.env`. Copy `.env.example` to `.env` and fill in the Firebase web app values. These `VITE_` variables are included in the client bundle, so Firebase API keys should be restricted to your deployed domains and Firebase security rules must protect your data.
-
-The Firebase web configuration and admin email/UID have safe defaults in `src/firebase-config.js`, so a Vercel build still initializes Firebase when project environment variables are not configured. You can override these defaults with the matching `VITE_FIREBASE_*` environment variables in Vercel. Firebase web API keys are public identifiers, not passwords; restrict their API usage and protect data with Firebase Authentication and Firestore rules.
 
 The Firestore client is exported as `db` from `src/firebase.js`. The `firestore.rules` file restricts reads and writes to the authenticated Firebase user with the configured admin UID. Publish these rules in Firebase Console under **Firestore Database → Rules**. The app must also sign in that user with Firebase Authentication before Firestore requests will be allowed; initializing Firestore alone does not sign in or grant access.
 
