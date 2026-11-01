@@ -4,10 +4,13 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import { defaultAdminConfig } from "./firebase-config.js";
 import { auth } from "./firebase.js";
 
-const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
-const adminUid = import.meta.env.VITE_FIREBASE_ADMIN_UID;
+const adminEmail =
+  import.meta.env.VITE_FIREBASE_ADMIN_EMAIL || defaultAdminConfig.email;
+const adminUid =
+  import.meta.env.VITE_FIREBASE_ADMIN_UID || defaultAdminConfig.uid;
 const adminPath = "/admin";
 
 if (!adminEmail || !adminUid) {
