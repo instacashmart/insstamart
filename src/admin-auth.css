@@ -83,3 +83,19 @@
 .admin-auth-status {
   margin: 0 !important;
 }
+
+.firestore-sync-notice {
+  position: fixed;
+  z-index: 2147483647;
+  right: 20px;
+  bottom: 20px;
+  max-width: min(440px, calc(100vw - 40px));
+  margin: 0;
+  padding: 14px 18px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #991b1b;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 14%);
+  font: 500 14px/1.5 "Plus Jakarta Sans", sans-serif;
+}

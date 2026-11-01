@@ -7,12 +7,40 @@ service cloud.firestore {
         && request.auth.uid == "1BMeS4vGMDPBXRmYBVNSNvR3ByM2";
     }
 
+    function isAnonymousUser() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == "anonymous";
+    }
+
+    function isPublicCatalog(dataset) {
+      return dataset in [
+        "products", "trending", "popular", "sellModels", "vehicleProducts"
+      ];
+    }
+
+    function isPublicSubmission(dataset) {
+      return dataset in [
+        "sell", "buy", "feedback", "reviews", "vehicles", "vehicleLeads"
+      ];
+    }
+
     match /appData/{dataset}/items/{itemId} {
-      allow read, write: if isAdmin()
-        && dataset in [
-          "sell", "buy", "products", "trending", "popular", "feedback",
-          "reviews", "sellModels", "vehicles", "vehicleLeads", "vehicleProducts"
-        ];
+      allow read: if isAdmin() || isPublicCatalog(dataset);
+      allow create: if isAdmin()
+        || (
+          isAnonymousUser()
+          && isPublicSubmission(dataset)
+          && request.resource.data.keys().hasOnly([
+            "position", "value", "createdAt", "createdBy"
+          ])
+          && request.resource.data.value is map
+          && request.resource.data.value.id is string
+          && request.resource.data.value.createdAt is string
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.position is number
+        );
+      allow update, delete: if isAdmin();
     }
   }
 }

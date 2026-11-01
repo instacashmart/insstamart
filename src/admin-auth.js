@@ -16,6 +16,7 @@ const adminPath = "/admin";
 let authReady = false;
 let currentUser = null;
 let authError = "";
+let syncError = "";
 let gate;
 
 function isAdminRoute() {
@@ -136,16 +137,23 @@ function renderGate() {
   }
 
   gate.status.textContent = authReady
-    ? ""
+    ? syncError
     : "Checking administrator access...";
   gate.form.hidden = !authReady;
-  gate.error.hidden = !authError;
-  gate.error.textContent = authError;
+  gate.error.hidden = !authError && !syncError;
+  gate.error.textContent = authError || syncError;
 }
+
+window.addEventListener("cashnova:firestore-status", (event) => {
+  const { state, message = "" } = event.detail || {};
+  syncError = state === "error" ? message : "";
+  renderGate();
+});
 
 onAuthStateChanged(auth, (user) => {
   authReady = true;
   authError = "";
+  syncError = "";
 
   if (user && user.uid !== adminUid) {
     currentUser = null;
