@@ -21,6 +21,7 @@ let activeUser;
 let profileCard;
 let profileStatus;
 let profileButton;
+let profileStatusState = "";
 let applyingRemoteProfile = false;
 let saveQueue = Promise.resolve();
 
@@ -54,12 +55,41 @@ function updateProfileStatus(state, message = "") {
   if (!profileStatus) {
     return;
   }
+  profileStatusState = state;
   if (profileStatus.textContent !== message) {
     profileStatus.textContent = message;
   }
   if (profileStatus.dataset.state !== state) {
     profileStatus.dataset.state = state;
   }
+}
+
+function googleSignInError(error) {
+  const code = error?.code;
+  if (code === "auth/unauthorized-domain") {
+    return `Google sign-in is blocked for ${window.location.hostname}. Add this domain to Firebase Authentication → Settings → Authorized domains, then try again.`;
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "Google sign-in is disabled for this Firebase project. Enable the Google provider in Firebase Authentication → Sign-in method.";
+  }
+  if (code === "auth/popup-blocked") {
+    return "Your browser blocked the Google sign-in popup. Allow popups for this site and try again.";
+  }
+  if (code === "auth/popup-closed-by-user") {
+    return "The Google sign-in window was closed before sign-in completed.";
+  }
+  if (
+    code === "auth/credential-already-in-use" ||
+    code === "auth/email-already-in-use"
+  ) {
+    return "This Google account already has an account. Sign in again to continue with that account.";
+  }
+  if (code === "auth/account-exists-with-different-credential") {
+    return "An account already exists for this email with another sign-in method. Sign in with that method first.";
+  }
+  return error instanceof Error
+    ? error.message
+    : "Google sign-in failed. Please try again.";
 }
 
 async function saveProfile(user, profile) {
@@ -203,9 +233,22 @@ function renderProfileCard() {
 
       updateProfileStatus("loading", "Connecting to Google...");
       try {
-        const result = auth.currentUser?.isAnonymous
-          ? await linkWithPopup(auth.currentUser, googleProvider)
-          : await signInWithPopup(auth, googleProvider);
+        let result;
+        if (auth.currentUser?.isAnonymous) {
+          try {
+            result = await linkWithPopup(auth.currentUser, googleProvider);
+          } catch (error) {
+            if (
+              error?.code !== "auth/credential-already-in-use" &&
+              error?.code !== "auth/email-already-in-use"
+            ) {
+              throw error;
+            }
+            result = await signInWithPopup(auth, googleProvider);
+          }
+        } else {
+          result = await signInWithPopup(auth, googleProvider);
+        }
         const profile = readLocalProfile();
         const updatedProfile = {
           ...profile,
@@ -233,9 +276,7 @@ function renderProfileCard() {
         console.error("Google profile sign-in failed.", error);
         updateProfileStatus(
           "error",
-          error instanceof Error
-            ? error.message
-            : "Google sign-in failed. Please try again.",
+          googleSignInError(error),
         );
       } finally {
         if (profileButton?.isConnected) {
@@ -259,15 +300,17 @@ function renderProfileCard() {
     profileSection.parentElement.insertBefore(profileCard, profileSection);
   }
 
-  if (!activeUser) {
-    updateProfileStatus("info", "Sign in to sync your profile across devices.");
-  } else if (activeUser.isAnonymous) {
-    updateProfileStatus("info", "Your profile is not linked to Google yet.");
-  } else {
-    updateProfileStatus(
-      "success",
-      `Signed in as ${activeUser.email || "your Google account"}.`,
-    );
+  if (!["error", "loading", "saving"].includes(profileStatusState)) {
+    if (!activeUser) {
+      updateProfileStatus("info", "Sign in to sync your profile across devices.");
+    } else if (activeUser.isAnonymous) {
+      updateProfileStatus("info", "Your profile is not linked to Google yet.");
+    } else {
+      updateProfileStatus(
+        "success",
+        `Signed in as ${activeUser.email || "your Google account"}.`,
+      );
+    }
   }
 }
 
@@ -299,6 +342,7 @@ window.addEventListener("cashnova:profile-status", (event) => {
 
 onAuthStateChanged(auth, (user) => {
   activeUser = user;
+  profileStatusState = "";
   renderProfileCard();
   if (user && !user.isAnonymous) {
     restoreRemoteProfile(user);
