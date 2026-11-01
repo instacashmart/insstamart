@@ -76,24 +76,19 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  if (user?.isAnonymous) {
+  if (user) {
     await loadAppAfterSync(startPublicFirestoreSync);
     return;
   }
 
-  if (!user) {
-    try {
-      await signInAnonymously(auth);
-    } catch (error) {
-      console.error("Unable to create an anonymous Firebase session.", error);
-      emitStatus(
-        "error",
-        "Could not connect to Firebase. Enable Anonymous sign-in in Firebase Authentication; form data may not be saved.",
-      );
-      await startApp();
-    }
-    return;
+  try {
+    await signInAnonymously(auth);
+  } catch (error) {
+    console.error("Unable to create an anonymous Firebase session.", error);
+    emitStatus(
+      "error",
+      "Could not connect to Firebase. Enable Anonymous sign-in in Firebase Authentication; form data may not be saved.",
+    );
+    await startApp();
   }
-
-  await startApp();
 });

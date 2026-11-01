@@ -204,7 +204,7 @@ async function writeAdminDataset(dataset, values) {
 
 async function writePublicSubmissions(dataset, values, previousValues) {
   const user = auth.currentUser;
-  if (!user || user.isAnonymous !== true) {
+  if (!user || user.uid === adminUid) {
     throw new Error("Sign in to submit data to Firestore.");
   }
 

@@ -155,14 +155,14 @@ onAuthStateChanged(auth, (user) => {
   authError = "";
   syncError = "";
 
-  if (user && user.uid !== adminUid) {
+  if (user && user.uid !== adminUid && isAdminRoute()) {
     currentUser = null;
     authError = "This account is not authorized to access the admin page.";
     signOut(auth).catch((cause) => {
       console.error("Could not sign out the unauthorized admin account.", cause);
     });
   } else {
-    currentUser = user;
+    currentUser = user?.uid === adminUid ? user : null;
   }
 
   renderGate();

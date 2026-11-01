@@ -1,0 +1,54 @@
+.profile-google-card {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  background: #eff6ff;
+}
+
+.profile-google-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.profile-google-content h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.profile-google-status {
+  flex: 1 1 220px;
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.profile-google-status[data-state="error"] {
+  color: #b91c1c;
+}
+
+.profile-google-status[data-state="success"] {
+  color: #166534;
+}
+
+.profile-google-button {
+  min-height: 42px;
+  padding: 9px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #1e293b;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-google-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
