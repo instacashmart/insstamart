@@ -24,6 +24,23 @@ function isAdminRoute() {
   return path === adminPath || path.startsWith(`${adminPath}/`);
 }
 
+function adminSignInError(error) {
+  switch (error?.code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "Firebase could not verify these credentials. Enter the exact email and password for the admin account, and confirm Email/Password is enabled in Firebase Authentication.";
+    case "auth/operation-not-allowed":
+      return "Email/password sign-in is disabled. Enable it in Firebase Authentication → Sign-in method.";
+    case "auth/unauthorized-domain":
+      return `Sign-in is blocked for ${window.location.hostname}. Add this domain to Firebase Authentication → Settings → Authorized domains.`;
+    default:
+      return error instanceof Error
+        ? error.message
+        : "Sign-in failed. Check your connection and try again.";
+  }
+}
+
 function createGate() {
   const overlay = document.createElement("section");
   overlay.className = "admin-auth-gate";
@@ -58,6 +75,7 @@ function createGate() {
   email.autocomplete = "username";
   email.required = true;
   email.value = adminEmail;
+  email.placeholder = "Firebase admin account email";
 
   const passwordLabel = document.createElement("label");
   passwordLabel.htmlFor = "admin-auth-password";
@@ -103,10 +121,8 @@ function createGate() {
 
       password.value = "";
     } catch (cause) {
-      error.textContent =
-        cause instanceof Error
-          ? cause.message
-          : "Sign-in failed. Check your connection and try again.";
+      console.error("Admin email/password sign-in failed.", cause);
+      error.textContent = adminSignInError(cause);
       error.hidden = false;
     } finally {
       submit.disabled = false;

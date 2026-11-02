@@ -44,6 +44,11 @@ function startApp() {
   return appStartPromise;
 }
 
+void startApp().catch((error) => {
+  console.error("Unable to load the application.", error);
+  emitStatus("error", "Unable to load the application. Refresh the page and try again.");
+});
+
 async function loadAppAfterSync(sync) {
   try {
     await sync();

@@ -9,6 +9,6 @@ export const defaultFirebaseConfig = {
 };
 
 export const defaultAdminConfig = {
-  email: "instacashmart@gmail.com",
-  uid: "1BMeS4vGMDPBXRmYBVNSNvR3ByM2",
+  email: "",
+  uid: "RLdRdvx5PUVqfxIZno5cnf36Zti1",
 };
